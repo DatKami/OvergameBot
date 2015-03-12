@@ -447,7 +447,7 @@ namespace OvergameBot
                         { groupChat(callback, overgameUndo(notValid[rnd.Next(notValid.Count)])); }
                         else { groupChat(callback, overgameIdle()); }
                     }
-                    if (callback.Message.Contains("csgogun"))
+                    else if (callback.Message.Contains("csgogun"))
                     {
                         groupChat(callback, overgameReact(callback));
                     }
