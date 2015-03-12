@@ -51,11 +51,6 @@ namespace OvergameBot
             aTimer.Interval = 6000;
             aTimer.Enabled = true;
 
-            phrases = new string[] { exclaim("toppermost of the poppermost", "!"), "Damngod...", exclaim("where " + overgameFriends(), "?"), exclaim("doc make me cwf", "!"),
-                                   exclaim(" HELLPPP!!! THAT IMPERSON ME", "!"), exclaim("i sick of overclone", "!"), exclaim("no", "!"),
-                                    exclaim(engDict[rnd.Next(dictLen)] + " " + engDict[rnd.Next(dictLen)] + " " + engDict[rnd.Next(dictLen)], "!")
-                                };
-
             SteamLogin();
         }
 
@@ -144,9 +139,7 @@ namespace OvergameBot
             {
                 Username = user,
                 Password = pass,
-
                 AuthCode = guard,
-
                 SentryFileHash = sentryhash,
 
             });
@@ -488,15 +481,25 @@ namespace OvergameBot
         static void OnJoinChat(SteamFriends.ChatEnterCallback callback)
         {   
             int prob = rndProb();
-            if (prob < 40)
+            if (prob < 20)
             {
                 steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, exclaim("IM NOT BOT", "!"));
             }
-            else if (prob < 80)
+            if (prob < 40)
+            {
+                steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, exclaim("im not bot..", "."));
+            }
+            else if (prob < 60)
             {
                 steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, "hello.");
                 Thread.Sleep(1500);
                 steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, "im back.");
+            }
+            else if (prob < 80)
+            {
+                steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, exclaim("hello..","."));
+                Thread.Sleep(1500);
+                steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, exclaim("im back..","."));
             }
             else
             {
@@ -532,20 +535,28 @@ namespace OvergameBot
             return exclaim("un" + message + " me", "!");
         }
 
+        public static void randomizePhrases()
+        {
+            phrases = new string[] { exclaim("toppermost of the poppermost", "!"), exclaim("Damngod..", "."), exclaim("where " + overgameFriends(), "?"), exclaim("doc make me cwf", "!"),
+                                   exclaim(" HELLPPP!!! THAT IMPERSON ME", "!"), exclaim("i sick of overclone", "!"), exclaim("no", "!"),
+                                    exclaim(engDict[rnd.Next(dictLen)] + " " + engDict[rnd.Next(dictLen)] + " " + engDict[rnd.Next(dictLen)], "!")
+                                };
+        }
+
         public static string overgameInvalid()
         {
-            string[] phrases = { exclaim("what you say", "!"), exclaim("english motherfucker, do you speak it", "?"), exclaim("STOP", "!") };
-            return phrases[rnd.Next(phrases.Length)];
+            string[] inval = { exclaim("what you say", "!"), exclaim("english motherfucker, do you speak it", "?"), exclaim("STOP", "!") };
+            return inval[rnd.Next(inval.Length)];
         }
 
         public static string overgameRandomCaps(string message)
         {
             int prob = rnd.Next(100);
-            if (prob < 25)
+            if (prob < 40)
             {
                 return message.ToLower(); //lowercase everything
             }
-            else if (prob < 75)
+            else if (prob < 80)
             {
                 return message.ToUpper(); //uppercase everything
             }
@@ -555,9 +566,11 @@ namespace OvergameBot
 
         public static string overgameIdle()
         {
+
             int prob = rndProb();
-            if (prob < 20) { return phrases[rnd.Next(phrases.Length)]; }
-            else if (prob < 60) { return exclaim(overStrings[rnd.Next(overStrings.Count)], "!"); }
+            if (prob < 15) { randomizePhrases(); return phrases[rnd.Next(phrases.Length)]; }
+            else if (prob < 35) { return exclaim(overStrings[rnd.Next(overStrings.Count)], "!"); }
+            else if (prob < 75) { return exclaim(stripPunct(overStrings[rnd.Next(overStrings.Count)]), "."); }
             return overStrings[rnd.Next(overStrings.Count)];
         }
 
@@ -590,7 +603,7 @@ namespace OvergameBot
             {
                 groupChat(callback, "*i set up " + engDict[rnd.Next(dictLen)] + " shield*");
                 Thread.Sleep(2000);
-                return "come get me sjws...";
+                return exclaim("come get me sjws..", ".");
             }
             else if (prob < 90)
             {
@@ -673,62 +686,23 @@ namespace OvergameBot
             return message + exclaimString;
         }
 
-        public static int read(string message)
+        /*
+         * Removes all punctuation at the end of a string.
+         */
+        public static string stripPunct(string message)
         {
-            Console.WriteLine("Thinking...");
-            Console.WriteLine("Thought!");
-            return (int)(message.Length * .1) * frantic;
+            while (!Char.IsLetter(message[message.Length - 1]))
+            { message = message.Remove(message.Length - 1); }
+            return message;
         }
 
-        public static int think()
-        {
-            return 18 * frantic;
-        }
+        public static int read(string message)  
+        { return (int)(message.Length * .1) * frantic; }
+
+        public static int think() { return 18 * frantic; }
 
         public static int type(string message)
-        {
-            Console.WriteLine("Typing...");
-            Console.WriteLine("Typed!");
-            return (int)(message.Length * .4 * frantic);
-        }
-       
-        public static string[] seperate(int number, char seperator, string theString)
-        {
-            string[] returned = new string[4];
-            int i = 0;
-            int error = 0;
-            int length = theString.Length;
-
-            foreach (char c in theString)
-            {
-                if (i != number)
-                {
-                    if (error > length || number > 5)
-                    {
-                        returned[0] = "-1";
-                        return returned;
-                    }
-                    else if (c == seperator)
-                    {
-                        returned[i] = theString.Remove(theString.IndexOf(c));
-                        theString = theString.Remove(0, theString.IndexOf(c) + 1);
-                        i++;
-                    }
-                    error++;
-
-                    if (error == length && i != number)
-                    {
-                        returned[0] = "-1";
-                        return returned;
-                    }
-                }
-                else
-                {
-                    returned[i] = theString;
-                }
-            }
-            return returned;
-        }
+        { return (int)(message.Length * .4 * frantic); }
 
         static void returnPassword()
         {
