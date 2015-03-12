@@ -203,78 +203,7 @@ namespace OvergameBot
         {
             steamFriends.SetPersonaState(EPersonaState.Online);
         }
-        /*
-        static void OnFriendMessage(SteamFriends.FriendMsgCallback callback)
-        {
-            string[] args;
-            if (callback.EntryType == EChatEntryType.ChatMsg)
-            {
-                //steamFriends.SendChatMessage(callback.Sender, EChatEntryType.ChatMsg, "GUNS!!");
-                if (callback.Message.Length > 1)
-                {
-                    if (callback.Message.Remove(1) == "!") //command
-                    {
-                        string command = callback.Message; //!friend [sid64] = !friend
-                        if (command.Contains(' '))
-                        {
-                            command = callback.Message.Remove(callback.Message.IndexOf(' '));
-                        }
 
-                        switch (command)
-                        {
-                            case "!send": //!send friendname message
-                                args = seperate(2, ' ', callback.Message);
-                                Console.WriteLine("!send " + args[1] + args[2] + " command received. User: " + steamFriends.GetFriendPersonaName(callback.Sender));
-                                if (args[0] == "-1")
-                                {
-                                    steamFriends.SendChatMessage(callback.Sender, EChatEntryType.ChatMsg, overgameInvalid());
-                                }
-                                break;
-                        }
-
-                    }
-                    else if (callback.Message.Remove(1) == "*") //act
-                    {
-                        char[] delim = { ' ', '.', ',', ':', '\t', '*' };
-                        string[] words = callback.Message.Split(delim, StringSplitOptions.RemoveEmptyEntries);
-                        List<string> notValid = new List<string>(new string [] {});
-                        Console.Write("Dictionary analysis of words...: ");
-                        foreach (string st in words)
-                        {
-                            string s = st.ToLower();
-                            Console.Write(s);
-                            if (!engDict.Contains(s) || s == "chicken" || s == "chi" )
-                            {
-                                notValid.Add(s);
-                                Console.Write("(!)");
-                            }
-                            Console.Write(" ");
-                        }
-                        Console.WriteLine("");
-
-                        notValid = dictException(notValid);
-
-                        Console.Write("Words to examine: ");
-                        foreach (string s in notValid) { Console.Write(s + " "); }
-                        Console.WriteLine("");
-
-                        if (notValid.Count >= 1)
-                        {
-                            steamFriends.SendChatMessage(callback.Sender, EChatEntryType.ChatMsg, overgameUndo(notValid[rnd.Next(notValid.Count)]));
-                        }
-                        else
-                        {
-                            steamFriends.SendChatMessage(callback.Sender, EChatEntryType.ChatMsg, overgameIdle());
-                        }
-                    }
-                    else if (callback.Message.Contains("overgame"))//act
-                    {
-                        steamFriends.SendChatMessage(callback.Sender, EChatEntryType.ChatMsg, overgameIdle());
-                    }
-                }
-            }
-        }
-        */
         static void OnChatMessage(SteamFriends.ChatMsgCallback callback)
         {
             Console.WriteLine("Received: " + callback.Message);
@@ -379,54 +308,33 @@ namespace OvergameBot
                         char[] delim = { ' ', '.', ',', ':', '\t', '*' };
                         string[] words = callback.Message.Split(delim, StringSplitOptions.RemoveEmptyEntries);
                         List<string> notValid = new List<string>(new string[] { });
-                        Console.Write("Dictionary analysis of words...: ");
+                        Console.Write("Analyzing words...: ");
                         foreach (string st in words)
                         {
                             string s = st.ToLower(); //compare to the lowercase dictionary
-                            Console.Write(s);
-                            if (!engDict.Contains(s))
-                            {
-                                notValid.Add(s);
-                                Console.Write("(!)");
-                            }
-                            Console.Write(" ");
 
-                            if (s == "kick")
+                            switch(s)
                             {
-                                overgameKickRoutine(callback);
-                                break;
-                            }
-                            else if (s == "ban")
-                            {
-                                overgameBanRoutine(callback);
-                                break;
+                                case "kick": case "ban":
+                                    overgameThreaten(callback, s);
+                                    return;
+                                case "aim":
+                                    groupChat(callback, overgameReact(callback));
+                                    return;
+                                case "chicken": case "chi": case "chicarrot": case "bully":
+                                    groupChat(callback, overgameUndo(s));
+                                    return;
+                                default:
+                                    Console.Write(s);
+                                    if (!engDict.Contains(s))
+                                    {
+                                        notValid.Add(s);
+                                        Console.Write("(!)");
+                                    }
+                                    Console.Write(" ");
+                                    break;
                             }
 
-                            else if (s == "aim")
-                            {
-                                groupChat(callback, overgameReact(callback));
-                                break;
-                            }
-                            else if (s == "chicken")
-                            {
-                                groupChat(callback, overgameUndo("chicken"));
-                                return;
-                            }
-                            else if (s == "chi")
-                            {
-                                groupChat(callback, overgameUndo("chi"));
-                                return;
-                            }
-                            else if (s == "chicarrot")
-                            {
-                                groupChat(callback, overgameUndo("chicarrot"));
-                                return;
-                            }
-                            else if (s == "bully")
-                            {
-                                groupChat(callback, overgameUndo("bully"));
-                                return;
-                            }
                         }
                         Console.WriteLine("");
 
@@ -621,22 +529,12 @@ namespace OvergameBot
 
 
 
-        public static void overgameKickRoutine(SteamFriends.ChatMsgCallback callback)
+        public static void overgameThreaten(SteamFriends.ChatMsgCallback callback, string threat)
         {
-            groupChat(callback, exclaim("no kick me", "!"));
-            Thread.Sleep(5000);
+            groupChat(callback, exclaim("no " + threat +" me", "!"));
+            Thread.Sleep(4000);
             int dur = rnd.Next(15000, 45000);
-            Console.WriteLine("Someone threatened to kick overgame. Coming back in {0} ms...", dur);
-            steamFriends.LeaveChat(callback.ChatRoomID);
-            Thread.Sleep(dur);
-            steamFriends.JoinChat(callback.ChatRoomID);
-        }
-        public static void overgameBanRoutine(SteamFriends.ChatMsgCallback callback)
-        {
-            groupChat(callback, exclaim("no ban me", "!"));
-            Thread.Sleep(5000);
-            int dur = rnd.Next(15000, 45000);
-            Console.WriteLine("Someone threatened to ban overgame. Coming back in {0} ms...", dur);
+            Console.WriteLine("Someone threatened to " + threat + " overgame. Coming back in {0} ms...", dur);
             steamFriends.LeaveChat(callback.ChatRoomID);
             Thread.Sleep(dur);
             steamFriends.JoinChat(callback.ChatRoomID);
