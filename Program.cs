@@ -15,6 +15,10 @@ namespace OvergameBot
 
         static readonly List<string> overStrings = new List<string>(File.ReadAllLines("overgame.txt")); // build known overgame phrases
 
+        static List<string> untouchStrings = new List<string>();
+        static List<string> heuntonStrings = new List<string>();
+        static List<string> cwfStrings = new List<string>();
+
         static string[] unnotable = new string[] { "kami", "wayne", "trog", "erarg", "mira" };
         static string[] notable = new string[] { "moupi", "untouch", "doc", "doc gelegentlich", "heunton", "moup", "boris", "garret", "damros", "sjws", "emagravo" };
 
@@ -23,6 +27,7 @@ namespace OvergameBot
         static int dictLen = 58110;
 
         static System.Timers.Timer aTimer = new System.Timers.Timer();
+        static System.Timers.Timer banTimer = new System.Timers.Timer(120000);
 
         static string user, pass, guard;
 
@@ -33,6 +38,8 @@ namespace OvergameBot
 
         static int frantic = 75;
         static int ignore = 0;
+
+        static bool kickable = false;
 
         static bool isRunning;
         static Random rnd = new Random();
@@ -47,6 +54,25 @@ namespace OvergameBot
 
             returnPassword();
 
+            foreach (string s in overStrings)
+            {
+                if (s.ToLower().Contains("untouch"))
+                {
+                    untouchStrings.Add(s);
+                }
+                if (s.ToLower().Contains("heu"))
+                {
+                    heuntonStrings.Add(s);
+                }
+                if (s.ToLower().Contains("cwf"))
+                {
+                    cwfStrings.Add(s);
+                }
+            }
+
+            banTimer.Elapsed += new System.Timers.ElapsedEventHandler(OnBanUp);
+            banTimer.Enabled = true;
+
             aTimer.Elapsed += new System.Timers.ElapsedEventHandler(OnTimerUp);
             aTimer.Interval = 6000;
             aTimer.Enabled = true;
@@ -59,6 +85,13 @@ namespace OvergameBot
             busy = false;
             aTimer.Enabled = false;
             Console.WriteLine("Now accepting requests.");
+        }
+
+        static void OnBanUp(object sender, EventArgs c)
+        {
+            kickable = true;
+            banTimer.Enabled = false;
+            Console.WriteLine("Now bannable.");
         }
 
         static void groupChat(SteamFriends.ChatMsgCallback callback, string message)
@@ -79,6 +112,12 @@ namespace OvergameBot
         {
             steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, overgameRandomCaps(message));
             ((System.Timers.Timer)sender).Dispose();
+        }
+
+        static void resetBanTimer()
+        {
+            banTimer.Interval = 120000;
+            banTimer.Enabled = true;
         }
 
         static void SteamLogin()
@@ -102,6 +141,10 @@ namespace OvergameBot
             //new Callback<SteamFriends.FriendMsgCallback>(OnFriendMessage, manager);
             new Callback<SteamFriends.ChatMsgCallback>(OnChatMessage, manager);
             new Callback<SteamFriends.ChatInviteCallback>(OnChatInvite, manager);
+
+            //new Callback<SteamFriends.FriendAddedCallback>(OnFriendInvite, manager);
+            new Callback<SteamFriends.FriendsListCallback>(OnFriendInvite, manager);
+
             new Callback<SteamFriends.ChatEnterCallback>(OnJoinChat, manager);
 
             steamClient.Connect();
@@ -214,26 +257,7 @@ namespace OvergameBot
                 if (callback.Message.Length > 1)
                 {
                     if (callback.Message.Remove(1) == "!") //command
-                    { // this doesn't do shit
-                        /*
-                        string command = callback.Message; //!friend [sid64] = !friend
-                        if (command.Contains(' '))
-                        {
-                            command = callback.Message.Remove(callback.Message.IndexOf(' '));
-                        }
-
-                        switch (command)
-                        {
-                            case "!send": //!send friendname message
-                                args = seperate(2, ' ', callback.Message);
-                                Console.WriteLine("!send " + args[1] + args[2] + " command received. Group invoked.");
-                                if (args[0] == "-1")
-                                {
-                                    groupChat(callback, overgameInvalid());
-                                }
-                                break;
-                        }
-                        */
+                    { 
                     }
                     else if (callback.Message.Contains("*i set ignore percent to"))
                     {
@@ -372,6 +396,38 @@ namespace OvergameBot
                     {
                         groupChat(callback, overgameReact(callback));
                     }
+                    else if (callback.Message.Contains("overclone"))
+                    {
+                        groupChat(callback, overgameImperson());
+                    }
+                    else if (callback.Message.Contains("bot"))
+                    {
+                        groupChat(callback, overgameImperson());
+                    }
+                    else if (callback.Message.Contains("clone"))
+                    {
+                        groupChat(callback, overgameImperson());
+                    }
+                    else if (callback.Message.Contains("imperson"))
+                    {
+                        groupChat(callback, overgameImperson());
+                    }
+                    else if (callback.Message.Contains("unt"))
+                    {
+                        groupChat(callback, overgameRandom(untouchStrings));
+                    }
+                    else if (callback.Message.Contains("heu"))
+                    {
+                        groupChat(callback, overgameRandom(heuntonStrings));
+                    }
+                    else if (callback.Message.Contains("cwf"))
+                    {
+                        groupChat(callback, overgameRandom(cwfStrings));
+                    }
+                    else if (callback.Message.Contains("bully"))
+                    {
+                        groupChat(callback, overgameReact(callback));
+                    }
                     else if (rndProb() < 25)
                     {
                         groupChat(callback, overgameIdle());
@@ -384,6 +440,22 @@ namespace OvergameBot
         static void OnChatInvite(SteamFriends.ChatInviteCallback callback)
         {
             steamFriends.JoinChat(callback.ChatRoomID);
+        }
+
+        static void OnFriendInvite(SteamFriends.FriendsListCallback callback)
+        {
+            Thread.Sleep(2500);
+            foreach (var friend in callback.FriendList)
+            {
+                if (friend.Relationship == EFriendRelationship.RequestRecipient)
+                {
+                    steamFriends.AddFriend(friend.SteamID);
+                }
+                if (friend.Relationship == EFriendRelationship.IgnoredFriend)
+                {
+                    steamFriends.IgnoreFriend(friend.SteamID, false);
+                }
+            }
         }
 
         static void OnJoinChat(SteamFriends.ChatEnterCallback callback)
@@ -417,7 +489,7 @@ namespace OvergameBot
 
         public static List<string> dictException(List<string> invalids)
         {
-            List<string> exceptions = new List<string>(new string[] {"i", "overgame"});
+            List<string> exceptions = new List<string>(new string[] {"i", "overgame", "cwf"});
             foreach (string s in exceptions)
             {
                 invalids.Remove(s);
@@ -451,6 +523,12 @@ namespace OvergameBot
                                 };
         }
 
+        public static string overgameImperson()
+        {
+            string[] imperson = { exclaim(" HELLPPP!!! THAT IMPERSON ME", "!"), exclaim("i sick of overclone", "!"), exclaim("no", "!") };
+            return imperson[rnd.Next(imperson.Length)];
+        }
+
         public static string overgameInvalid()
         {
             string[] inval = { exclaim("what you say", "!"), exclaim("english motherfucker, do you speak it", "?"), exclaim("STOP", "!") };
@@ -480,6 +558,14 @@ namespace OvergameBot
             else if (prob < 35) { return exclaim(overStrings[rnd.Next(overStrings.Count)], "!"); }
             else if (prob < 75) { return exclaim(stripPunct(overStrings[rnd.Next(overStrings.Count)]), "."); }
             return overStrings[rnd.Next(overStrings.Count)];
+        }
+
+        public static string overgameRandom(List<string> stringList)
+        {
+            int prob = rndProb();
+            if (prob < 40) { return exclaim(stringList[rnd.Next(stringList.Count)], "!"); }
+            else if (prob < 80) { return exclaim(stripPunct(stringList[rnd.Next(stringList.Count)]), "."); }
+            return stringList[rnd.Next(stringList.Count)];
         }
 
         public static string overgameReact(SteamFriends.ChatMsgCallback callback)
@@ -531,13 +617,24 @@ namespace OvergameBot
 
         public static void overgameThreaten(SteamFriends.ChatMsgCallback callback, string threat)
         {
-            groupChat(callback, exclaim("no " + threat +" me", "!"));
-            Thread.Sleep(4000);
-            int dur = rnd.Next(15000, 45000);
-            Console.WriteLine("Someone threatened to " + threat + " overgame. Coming back in {0} ms...", dur);
-            steamFriends.LeaveChat(callback.ChatRoomID);
-            Thread.Sleep(dur);
-            steamFriends.JoinChat(callback.ChatRoomID);
+            if (kickable)
+            {
+                groupChat(callback, exclaim("no " + threat + " me", "!"));
+                Thread.Sleep(4000);
+                int dur = rnd.Next(15000, 45000);
+                Console.WriteLine("Someone threatened to " + threat + " overgame. Coming back in {0} ms...", dur);
+                steamFriends.LeaveChat(callback.ChatRoomID);
+                Thread.Sleep(dur);
+                steamFriends.JoinChat(callback.ChatRoomID);
+                kickable = false;
+                resetBanTimer();
+            }
+            else
+            {
+                groupChat(callback, exclaim("you sjw trick never work..", "."));
+                Thread.Sleep(3000);
+                groupChat(callback, overgameReact(callback));
+            }
         }
 
         public static int rndProb()

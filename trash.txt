@@ -160,3 +160,24 @@
                                     return;
                                 }
                                  * */
+
+// this doesn't do shit
+                        /*
+                        string command = callback.Message; //!friend [sid64] = !friend
+                        if (command.Contains(' '))
+                        {
+                            command = callback.Message.Remove(callback.Message.IndexOf(' '));
+                        }
+
+                        switch (command)
+                        {
+                            case "!send": //!send friendname message
+                                args = seperate(2, ' ', callback.Message);
+                                Console.WriteLine("!send " + args[1] + args[2] + " command received. Group invoked.");
+                                if (args[0] == "-1")
+                                {
+                                    groupChat(callback, overgameInvalid());
+                                }
+                                break;
+                        }
+                        */
