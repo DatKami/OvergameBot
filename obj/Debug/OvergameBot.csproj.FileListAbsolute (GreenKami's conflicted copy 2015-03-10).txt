@@ -1,0 +1,12 @@
+C:\Users\Brandon\Desktop\Dropbox\Visual Studio\OvergameBot\OvergameBot\bin\Debug\OvergameBot.exe.config
+C:\Users\Kami\Desktop\Dropbox\Visual Studio\OvergameBot\OvergameBot\bin\Debug\OvergameBot.exe.config
+C:\Users\Kami\Desktop\Dropbox\Visual Studio\OvergameBot\OvergameBot\obj\Debug\OvergameBot.csprojResolveAssemblyReference.cache
+C:\Users\Kami\Desktop\Dropbox\Visual Studio\OvergameBot\OvergameBot\bin\Debug\OvergameBot.exe
+C:\Users\Kami\Desktop\Dropbox\Visual Studio\OvergameBot\OvergameBot\bin\Debug\OvergameBot.pdb
+C:\Users\Kami\Desktop\Dropbox\Visual Studio\OvergameBot\OvergameBot\bin\Debug\protobuf-net.dll
+C:\Users\Kami\Desktop\Dropbox\Visual Studio\OvergameBot\OvergameBot\bin\Debug\SteamKit2.dll
+C:\Users\Kami\Desktop\Dropbox\Visual Studio\OvergameBot\OvergameBot\bin\Debug\protobuf-net.pdb
+C:\Users\Kami\Desktop\Dropbox\Visual Studio\OvergameBot\OvergameBot\bin\Debug\protobuf-net.xml
+C:\Users\Kami\Desktop\Dropbox\Visual Studio\OvergameBot\OvergameBot\bin\Debug\SteamKit2.xml
+C:\Users\Kami\Desktop\Dropbox\Visual Studio\OvergameBot\OvergameBot\obj\Debug\OvergameBot.exe
+C:\Users\Kami\Desktop\Dropbox\Visual Studio\OvergameBot\OvergameBot\obj\Debug\OvergameBot.pdb
