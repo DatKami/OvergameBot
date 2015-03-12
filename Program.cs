@@ -447,20 +447,9 @@ namespace OvergameBot
                         { groupChat(callback, overgameUndo(notValid[rnd.Next(notValid.Count)])); }
                         else { groupChat(callback, overgameIdle()); }
                     }
-                    else if (callback.Message.Remove(1) == "?") //emote
+                    if (callback.Message.Contains("csgogun"))
                     {
-                        if (callback.Message.Contains("csgogun"))
-                        {
-                            groupChat(callback, overgameReact(callback));
-                        }
-                        else if (callback.Message.Contains("chicken"))
-                        {
-                            groupChat(callback, overgameReact(callback));
-                        }
-                        else if (callback.Message.Contains("9000"))
-                        {
-                            groupChat(callback, overgameReact(callback));
-                        }
+                        groupChat(callback, overgameReact(callback));
                     }
                     else if (callback.Message.Contains("%"))
                     {
@@ -473,6 +462,14 @@ namespace OvergameBot
                     else if (callback.Message.ToLower().Contains("overgame"))//act
                     {
                         groupChat(callback, overgameIdle());
+                    }
+                    else if (callback.Message.Contains("chicken"))
+                    {
+                        groupChat(callback, overgameReact(callback));
+                    }
+                    else if (callback.Message.Contains("9000"))
+                    {
+                        groupChat(callback, overgameReact(callback));
                     }
                     else if (rndProb() < 25)
                     {
