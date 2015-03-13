@@ -46,6 +46,11 @@ namespace OvergameBot
 
         static bool busy = false;
 
+        public static int rndProb()
+        {
+            return rnd.Next(100);
+        }
+
         static void Main(string[] args)
         {
 
@@ -251,17 +256,17 @@ namespace OvergameBot
         {
             Console.WriteLine("Received: " + callback.Message);
             if (busy) { Console.WriteLine("Busy."); return; }
-            string[] args;
+            string lower = callback.Message.ToLower();
             if (callback.ChatMsgType == EChatEntryType.ChatMsg)
             {
-                if (callback.Message.Length > 1)
+                if (lower.Length > 1)
                 {
-                    if (callback.Message.Remove(1) == "!") //command
+                    if (lower.Remove(1) == "!") //command
                     { 
                     }
-                    else if (callback.Message.Contains("*i set ignore percent to"))
+                    else if (lower.Contains("*i set ignore percent to"))
                     {
-                        string val = callback.Message.Substring(25);
+                        string val = lower.Substring(25);
                         string val2 = "";
                         int count = 0;
                         foreach (char c in val)
@@ -286,9 +291,9 @@ namespace OvergameBot
                         }
 
                     }
-                    else if (callback.Message.Contains("*i set overgame speed to"))
+                    else if (lower.Contains("*i set overgame speed to"))
                     {
-                        string val = callback.Message.Substring(25);
+                        string val = lower.Substring(25);
                         string val2 = "";
                         foreach (char c in val)
                         {
@@ -327,15 +332,14 @@ namespace OvergameBot
                         steamFriends.SetPersonaName(val2);
                     }
                     else if (rndProb() < ignore) { return; } // random prob in lieu of wait ignore
-                    else if (callback.Message.Remove(1) == "*") //act
+                    else if (lower.Remove(1) == "*") //act
                     {
                         char[] delim = { ' ', '.', ',', ':', '\t', '*' };
-                        string[] words = callback.Message.Split(delim, StringSplitOptions.RemoveEmptyEntries);
+                        string[] words = lower.Split(delim, StringSplitOptions.RemoveEmptyEntries);
                         List<string> notValid = new List<string>(new string[] { });
                         Console.Write("Analyzing words...: ");
-                        foreach (string st in words)
+                        foreach (string s in words)
                         {
-                            string s = st.ToLower(); //compare to the lowercase dictionary
 
                             switch(s)
                             {
@@ -372,59 +376,47 @@ namespace OvergameBot
                         { groupChat(callback, overgameUndo(notValid[rnd.Next(notValid.Count)])); }
                         else { groupChat(callback, overgameIdle()); }
                     }
-                    else if (callback.Message.Contains("csgogun"))
+                    else if (lower.Contains("csgogun"))
                     {
                         groupChat(callback, overgameReact(callback));
                     }
-                    else if (callback.Message.Contains("%"))
+                    else if (lower.Contains("%"))
                     {
                         spamNO(callback, 300);
                     }
-                    else if (callback.Message.ToLower().Contains("ban"))
+                    else if (lower.Contains("ban"))
                     {
-                        spamNO(callback, 1000);
+                        spamNO(callback, 500);
                     }
-                    else if (callback.Message.ToLower().Contains("overgame"))//act
+                    else if (lower.Contains("overgame"))//act
                     {
                         groupChat(callback, overgameIdle());
                     }
-                    else if (callback.Message.Contains("chicken"))
+                    else if (lower.Contains("chicken"))
                     {
                         groupChat(callback, overgameReact(callback));
                     }
-                    else if (callback.Message.Contains("9000"))
+                    else if (lower.Contains("9000"))
                     {
                         groupChat(callback, overgameReact(callback));
                     }
-                    else if (callback.Message.Contains("overclone"))
+                    else if (lower.Contains("bot") || lower.Contains("clone") || lower.Contains("imperson"))
                     {
                         groupChat(callback, overgameImperson());
                     }
-                    else if (callback.Message.Contains("bot"))
-                    {
-                        groupChat(callback, overgameImperson());
-                    }
-                    else if (callback.Message.Contains("clone"))
-                    {
-                        groupChat(callback, overgameImperson());
-                    }
-                    else if (callback.Message.Contains("imperson"))
-                    {
-                        groupChat(callback, overgameImperson());
-                    }
-                    else if (callback.Message.Contains("unt"))
+                    else if (lower.Contains("unt"))
                     {
                         groupChat(callback, overgameRandom(untouchStrings));
                     }
-                    else if (callback.Message.Contains("heu"))
+                    else if (lower.Contains("heu"))
                     {
                         groupChat(callback, overgameRandom(heuntonStrings));
                     }
-                    else if (callback.Message.Contains("cwf"))
+                    else if (lower.Contains("cwf"))
                     {
                         groupChat(callback, overgameRandom(cwfStrings));
                     }
-                    else if (callback.Message.Contains("bully"))
+                    else if (lower.Contains("bully"))
                     {
                         groupChat(callback, overgameReact(callback));
                     }
@@ -635,11 +627,6 @@ namespace OvergameBot
                 Thread.Sleep(3000);
                 groupChat(callback, overgameReact(callback));
             }
-        }
-
-        public static int rndProb()
-        {
-            return rnd.Next(100);
         }
 
         public static void spamNO(SteamFriends.ChatMsgCallback callback, int frequency)
