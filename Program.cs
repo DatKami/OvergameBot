@@ -519,6 +519,7 @@ namespace OvergameBot
           else if (lower.Contains("cwf")) { groupChat(callback, overgameRandom(cwfStrings)); }
           else if (lower.Contains("bully")) { groupChat(callback, overgameReact(callback)); }
           else if (lower.Contains("last word")) { groupChat(callback, overgameInvalid()); }
+          else if (lower.Contains("hmm")) { groupChat(callback, overgameIdea(callback)); }
           else if (rndProb() < 25) { groupChat(callback, overgameIdle()); }
         }
       }
@@ -581,7 +582,7 @@ namespace OvergameBot
 
     public static string overgameIdea(SteamFriends.ChatMsgCallback callback)
     {
-      steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, "i have idea!");
+      steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, exclaim("i have idea", "!"));
       Thread.Sleep(1500);
       return "how about " + overgameFriends() + " vs " + overgameFriends() + " at CWF " + engDict[rnd.Next(dictLen)] + "?";
     }
