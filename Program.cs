@@ -17,6 +17,10 @@ namespace OvergameBot
 
     static Dictionary<string, string> steamIDs = new Dictionary<string, string>();
 
+    //list of chatrooms overgame has visited in this run.
+    //this may be errorprone as there is no way to determine if a bot gets kicked from chat.
+    static List<SteamID> chatrooms = new List<SteamID>();
+
     static List<string> untouchStrings = new List<string>();
     static List<string> heuntonStrings = new List<string>();
     static List<string> cwfStrings = new List<string>();
@@ -333,6 +337,9 @@ namespace OvergameBot
 
     static void OnJoinChat(SteamFriends.ChatEnterCallback callback)
     {  
+      //commit the chatroom to the chatrooms list
+      if(!chatrooms.Contains(callback.ChatID)) chatrooms.Add(callback.ChatID); 
+
       int prob = rndProb();
       if (prob < 20)
       {
@@ -376,7 +383,15 @@ namespace OvergameBot
       {
         if (lower.Length > 1)
         {
-          if (lower.Contains("*i set ignore percent to"))
+          if (lower.Contains("!echo "))//echo a message to all other rooms
+          {
+            foreach (SteamID roomID in chatrooms)
+            {
+              if (roomID != callback.ChatRoomID) //do not echo to the same room the command is typed in
+              steamFriends.SendChatRoomMessage(roomID, EChatEntryType.ChatMsg, callback.Message.Substring(6));
+            }
+          }
+          else if (lower.Contains("*i set ignore percent to"))
           {
             string val = lower.Substring(25);
             string val2 = "";
@@ -649,6 +664,8 @@ namespace OvergameBot
         Thread.Sleep(4000);
         int dur = rnd.Next(15000, 45000);
         Console.WriteLine("Someone threatened to " + threat + " overgame. Coming back in {0} ms...", dur);
+        //remove the chatroom from the chatrooms list temporaililly
+        if (chatrooms.Contains(callback.ChatRoomID)) chatrooms.Remove(callback.ChatRoomID);
         steamFriends.LeaveChat(callback.ChatRoomID);
         Thread.Sleep(dur);
         steamFriends.JoinChat(callback.ChatRoomID);
