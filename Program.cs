@@ -612,13 +612,21 @@ namespace OvergameBot
         Thread.Sleep(2000);
         return "*i laugh*";
       }
-      else if (prob < 60)
+      else if (prob < 50)
       {
         groupChat(callback, "*i look to super tendies*");
         Thread.Sleep(2000);
         groupChat(callback, "*it super baby unbrumpert*");
         Thread.Sleep(2000);
         return "*i laugh*";
+      }
+      else if (prob < 65)
+      {
+        groupChat(callback, "*i aim gun to myself*");
+        Thread.Sleep(2000);
+        groupChat(callback, "*i shoot it*");
+        Thread.Sleep(2000);
+        return "*i dead*";
       }
       else if (prob < 80)
       {
