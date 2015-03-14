@@ -15,6 +15,8 @@ namespace OvergameBot
 
     static readonly List<string> overStrings = new List<string>(File.ReadAllLines("overgame.txt")); // build known overgame phrases
 
+    static Dictionary<string, string> steamIDs = new Dictionary<string, string>();
+
     static List<string> untouchStrings = new List<string>();
     static List<string> heuntonStrings = new List<string>();
     static List<string> cwfStrings = new List<string>();
@@ -49,6 +51,7 @@ namespace OvergameBot
     static Random rnd = new Random();
 
     static bool busy = false;
+
 
     // ======================== HELPER FUNCTIONS ========================
 
@@ -113,6 +116,10 @@ namespace OvergameBot
       Console.WriteLine("CTRL+C bully me!");
 
       getCredentials();
+
+      //enumerate steamIDs
+      steamIDs.Add("STEAM_0:1:29195580", "untouch");
+      steamIDs.Add("STEAM_0:0:63212978", "overgame");
 
       foreach (string st in overStrings)
       {
@@ -357,8 +364,13 @@ namespace OvergameBot
 
     static void OnChatMessage(SteamFriends.ChatMsgCallback callback)
     {
-      Console.WriteLine("Received: " + callback.Message);
+      SteamID id = callback.ChatterID;
+      string idstr = id.ToString();
+      string chatter = steamFriends.GetFriendPersonaName(id);
+
+      Console.WriteLine(chatter + "(" + idstr + "): " + callback.Message);
       if (busy) { Console.WriteLine("Busy."); return; }
+
       string lower = callback.Message.ToLower();
       if (callback.ChatMsgType == EChatEntryType.ChatMsg)
       {
@@ -493,6 +505,15 @@ namespace OvergameBot
           else if (lower.Contains("bully")) { groupChat(callback, overgameReact(callback)); }
           else if (lower.Contains("last word")) { groupChat(callback, overgameInvalid()); }
           else if (lower.Contains("hmm")) { groupChat(callback, overgameIdea(callback)); }
+          else if (lower.Contains("hi.") || lower.Contains("hello")) 
+          {
+            if (rndProb() < 50)
+            {
+              Thread.Sleep(1500);
+              steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, exclaim("hi " + chatter, "."));
+            }
+            else { groupChat(callback, overgameReact(callback)); }
+          }
           else if (rndProb() < 25) { groupChat(callback, overgameIdle()); }
         }
       }
@@ -555,9 +576,14 @@ namespace OvergameBot
 
     public static string overgameIdea(SteamFriends.ChatMsgCallback callback)
     {
+      Thread.Sleep(1500);
       steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, exclaim("i have idea", "!"));
       Thread.Sleep(1500);
-      return "how about " + overgameFriends() + " vs " + overgameFriends() + " at CWF " + engDict[rnd.Next(dictLen)] + "?";
+      int prob = rndProb();
+      if (prob < 50) return overgameFriends() + " is dead in new CWF " + 
+      engDict[rnd.Next(dictLen)] + " " + engDict[rnd.Next(dictLen)] + "?";
+      return "how about " + overgameFriends() + " vs " + overgameFriends() +
+                              " at CWF " + engDict[rnd.Next(dictLen)] + "?";
     }
 
     public static string overgameRandom(List<string> stringList)
