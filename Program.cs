@@ -376,7 +376,7 @@ namespace OvergameBot
       string chatter = steamFriends.GetFriendPersonaName(id);
 
       Console.WriteLine(chatter + "(" + idstr + "): " + callback.Message);
-      if (busy) { Console.WriteLine("Busy."); return; }
+      if (busy) { Console.WriteLine("Busy."); }
 
       string lower = callback.Message.ToLower();
       if (callback.ChatMsgType == EChatEntryType.ChatMsg)
@@ -388,7 +388,7 @@ namespace OvergameBot
             foreach (SteamID roomID in chatrooms)
             {
               if (roomID != callback.ChatRoomID) //do not echo to the same room the command is typed in
-              steamFriends.SendChatRoomMessage(roomID, EChatEntryType.ChatMsg, callback.Message.Substring(6));
+                steamFriends.SendChatRoomMessage(roomID, EChatEntryType.ChatMsg, callback.Message.Substring(6));
             }
           }
           else if (lower.Contains("*i set ignore percent to"))
@@ -405,7 +405,7 @@ namespace OvergameBot
             int i = -1;
             try { i = int.Parse(val2); }
             catch (FormatException)
-            { 
+            {
               groupChat(callback, exclaim("you wrong!!! that number", "?"));
               return;
             }
@@ -468,7 +468,8 @@ namespace OvergameBot
             if (rndProb() < 50) groupChat(callback, exclaim("HEY", "!"));
             else groupChat(callback, exclaim("WHAT", "!"));
           }
-          else if (rndProb() < ignore) { return; } // random prob in lieu of wait ignore
+          else if (busy) return;
+          else if (rndProb() < ignore) return; // random prob in lieu of wait ignore
           else if (lower.Remove(1) == "*") //act
           {
             string[] words = tokenize(lower);
@@ -505,6 +506,7 @@ namespace OvergameBot
             else { groupChat(callback, overgameIdle()); }
           }
           else if (lower.Contains("csgogun")) { groupChat(callback, overgameReact(callback)); }
+          else if (lower.Contains("slugpoo")) { groupChat(callback, exclaim("HEY", "!")); }
           else if (lower.Contains("chicken")) { groupChat(callback, overgameReact(callback)); }
           else if (lower.Contains("carrot")) { groupChat(callback, overgameReact(callback)); }
           else if (lower.Contains("brumpert")) { groupChat(callback, overgameReact(callback)); }
@@ -520,7 +522,7 @@ namespace OvergameBot
           else if (lower.Contains("bully")) { groupChat(callback, overgameReact(callback)); }
           else if (lower.Contains("last word")) { groupChat(callback, overgameInvalid()); }
           else if (lower.Contains("hmm")) { groupChat(callback, overgameIdea(callback)); }
-          else if (lower.Contains("hi.") || lower.Contains("hello")) 
+          else if (lower.Contains("hi.") || lower.Contains("hello"))
           {
             if (rndProb() < 50)
             {
