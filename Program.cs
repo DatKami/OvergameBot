@@ -30,7 +30,7 @@ namespace OvergameBot
     
     static int dictLen = 58110;
 
-    static System.Timers.Timer aTimer = new System.Timers.Timer();
+    static System.Timers.Timer aTimer = new System.Timers.Timer(6000);
     static System.Timers.Timer banTimer = new System.Timers.Timer(120000);
 
     static string user, pass, guard;
@@ -112,62 +112,42 @@ namespace OvergameBot
       Console.Title = "OvergameBot";
       Console.WriteLine("CTRL+C bully me!");
 
-      returnPassword();
+      getCredentials();
 
-      foreach (string s in overStrings)
+      foreach (string st in overStrings)
       {
-        if (s.ToLower().Contains("untouch"))
-        {
-          untouchStrings.Add(s);
-        }
-        if (s.ToLower().Contains("heu") || s.ToLower().Contains("hue"))
-        {
-          heuntonStrings.Add(s);
-        }
-        if (s.ToLower().Contains("cwf"))
-        {
-          cwfStrings.Add(s);
-        }
+        string s = st.ToLower();
+        if (s.Contains("untouch")) untouchStrings.Add(s); 
+        if (s.Contains("heu") || s.Contains("hue")) heuntonStrings.Add(s); 
+        if (s.Contains("cwf")) cwfStrings.Add(s);
       }
 
       banTimer.Elapsed += new System.Timers.ElapsedEventHandler(OnBanUp);
       banTimer.Enabled = true;
 
       aTimer.Elapsed += new System.Timers.ElapsedEventHandler(OnTimerUp);
-      aTimer.Interval = 6000;
       aTimer.Enabled = true;
 
       SteamLogin();
     }
 
-    static void returnPassword()
+    static void getCredentials()
     {
-      Console.Write("I what username!: ");
-      user = Console.ReadLine();
-      Console.Write("I what password!: ");
-      pass = "";
+      Console.Write("I what username!: "); user = Console.ReadLine();
+      Console.Write("I what password!: "); pass = "";
       ConsoleKeyInfo info = Console.ReadKey(true);
       while (info.Key != ConsoleKey.Enter)
       {
         if (info.Key != ConsoleKey.Backspace)
-        {
-          pass += info.KeyChar;
-          info = Console.ReadKey(true);
-        }
+        { pass += info.KeyChar; info = Console.ReadKey(true); }
         else if (info.Key == ConsoleKey.Backspace)
         {
           if (!string.IsNullOrEmpty(pass))
-          {
-            pass = pass.Substring
-            (0, pass.Length - 1);
-          }
+          { pass = pass.Substring(0, pass.Length - 1); }
           info = Console.ReadKey(true);
         }
       }
-      for (int i = 0; i < pass.Length; i++)
-      {
-        Console.Write("*");
-      }
+      for (int i = 0; i < pass.Length; i++) { Console.Write("*"); }
       Console.Write("\n");
     }
 
@@ -393,10 +373,7 @@ namespace OvergameBot
             {
               if (count >= 5) { break; }
               if (Char.IsDigit(c))
-              {
-                val2 = val2 + c;
-                ++count;
-              }
+              { val2 = val2 + c; ++count; }
             }
             int i = -1;
             try { i = int.Parse(val2); }
@@ -405,16 +382,12 @@ namespace OvergameBot
               groupChat(callback, exclaim("you wrong!!! that number", "?"));
               return;
             }
-
             if (i >= 0)
             {
               ignore = i;
               groupChat(callback, exclaim("get " + i + "% of shit out", "!"));
             }
-            else
-            {
-              groupChat(callback, exclaim("you wrong", "!"));
-            }
+            else groupChat(callback, exclaim("you wrong", "!"));
 
           }
           else if (lower.Contains("*i set overgame speed to"))
@@ -529,9 +502,9 @@ namespace OvergameBot
 
     public static List<string> dictException(List<string> invalids)
     {
-      foreach (string s in exceptions) { invalids.Remove(s); }
-      foreach (string s in unnotable) { invalids.Remove(s); }
-      foreach (string s in notable) { invalids.Remove(s); }
+      foreach (string s in exceptions) { while (invalids.Contains(s)) invalids.Remove(s); }
+      foreach (string s in unnotable) { while (invalids.Contains(s)) invalids.Remove(s); }
+      foreach (string s in notable) { while (invalids.Contains(s)) invalids.Remove(s); }
       return invalids;
     }
 
@@ -604,28 +577,22 @@ namespace OvergameBot
       }
       else if (prob < 45)
       {
-        groupChat(callback, "*rewind*");
-        Thread.Sleep(2000);
-        groupChat(callback, "*you aim self*");
-        Thread.Sleep(2000);
+        groupChat(callback, "*rewind*"); Thread.Sleep(2000);
+        groupChat(callback, "*you aim self*"); Thread.Sleep(2000);
         groupChat(callback, "*you " + engDict[rnd.Next(dictLen)] +"*");
         Thread.Sleep(2000);
         return "*i laugh*";
       }
       else if (prob < 50)
       {
-        groupChat(callback, "*i look to super tendies*");
-        Thread.Sleep(2000);
-        groupChat(callback, "*it super baby unbrumpert*");
-        Thread.Sleep(2000);
+        groupChat(callback, "*i look to super tendies*"); Thread.Sleep(2000);
+        groupChat(callback, "*it super baby unbrumpert*"); Thread.Sleep(2000);
         return "*i laugh*";
       }
       else if (prob < 65)
       {
-        groupChat(callback, "*i aim gun to myself*");
-        Thread.Sleep(2000);
-        groupChat(callback, "*i shoot it*");
-        Thread.Sleep(2000);
+        groupChat(callback, "*i aim gun to myself*"); Thread.Sleep(2000);
+        groupChat(callback, "*i shoot it*"); Thread.Sleep(2000);
         return "*i dead*";
       }
       else if (prob < 80)
@@ -659,8 +626,7 @@ namespace OvergameBot
         steamFriends.LeaveChat(callback.ChatRoomID);
         Thread.Sleep(dur);
         steamFriends.JoinChat(callback.ChatRoomID);
-        kickable = false;
-        resetBanTimer();
+        kickable = false; resetBanTimer();
       }
       else
       {
@@ -684,14 +650,10 @@ namespace OvergameBot
     }
 
     public static string overgameAim(string a, string b)
-    {  
-      return "*i aim " + a + " to " + b + "*";
-    }
+    { return "*i aim " + a + " to " + b + "*"; }
 
     public static string overgameLook(string a)
-    {
-      return "*i look to " + a + "*";
-    }
+    { return "*i look to " + a + "*"; }
 
     public static string overgameFriends()
     {
