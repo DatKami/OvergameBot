@@ -27,7 +27,7 @@ namespace OvergameBot
 
     static readonly string[] unnotable = new string[] { "kami", "wayne", "trog", "erarg", "mira", "anita" };
     static readonly string[] notable = new string[] { "moupi", "untouch",
-    "doc", "doc gelegentlich", "heunton", "moup", "boris", "garret", "damros", "sjws", "emagravo" };
+    "doc", "doc gelegentlich", "heunton", "moup", "boris", "garret", "damros", "sjws", "emagravo", "garrett" };
     static readonly string[] exceptions = new string[] { "i", "overgame", "cwf", "laugh" };
 
     static readonly char[] delim = { ' ', '.', ',', ':', '\t', '*' };
@@ -531,7 +531,7 @@ namespace OvergameBot
           else if (lower.Contains("bully")) { groupChat(callback, overgameReact(callback)); }
           else if (lower.Contains("last word")) { groupChat(callback, overgameInvalid()); }
           else if (lower.Contains("hmm")) { groupChat(callback, overgameIdea(callback)); }
-          else if (lower.Contains("hi.") || lower.Contains("hello"))
+          else if (lower.Contains("hi. ") || lower.Contains("hello"))
           {
             if (rndProb() < 50)
             {
