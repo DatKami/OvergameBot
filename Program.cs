@@ -27,7 +27,7 @@ namespace OvergameBot
 
     static readonly string[] unnotable = new string[] { "kami", "wayne", "trog", "erarg", "mira", "anita" };
     static readonly string[] notable = new string[] { "moupi", "untouch",
-    "doc", "doc gelegentlich", "heunton", "moup", "boris", "garret", "damros", "sjws", "emagravo" };
+    "doc", "doc gelegentlich", "heunton", "moup", "boris", "garret", "damros", "sjws", "emagravo", "garrett" };
     static readonly string[] exceptions = new string[] { "i", "overgame", "cwf", "laugh" };
 
     static readonly char[] delim = { ' ', '.', ',', ':', '\t', '*' };
@@ -105,10 +105,18 @@ namespace OvergameBot
 
     public static void randomizePhrases()
     {
-      phrases = new string[] { exclaim("toppermost of the poppermost", "!"), exclaim("Damngod..", "."), exclaim("where " + overgameFriends(), "?"), exclaim("doc make me cwf", "!"),
-                  exclaim(" HELLPPP!!! THAT IMPERSON ME", "!"), exclaim("i sick of overclone", "!"), exclaim("no", "!"),
-                  exclaim(engDict[rnd.Next(dictLen)] + " " + engDict[rnd.Next(dictLen)] + " " + engDict[rnd.Next(dictLen)], "!")
-                };
+      phrases = new string[] { exclaim("toppermost of the poppermost", "!"), 
+                               exclaim("Damngod..", "."),
+                               exclaim("where " + overgameFriends(), "?"), 
+                               exclaim("doc make me cwf", "!"),
+                               exclaim(" HELLPPP!!! THAT IMPERSON ME", "!"), 
+                               exclaim("i sick of overclone", "!"), 
+                               exclaim("no", "!"),
+
+                               exclaim(engDict[rnd.Next(dictLen)] + " " +
+                               engDict[rnd.Next(dictLen)] + " " +
+                               engDict[rnd.Next(dictLen)], "!")
+                             };
     }
 
     // ======================== BOT INITIALIZATION ROUTINE ========================
@@ -456,6 +464,7 @@ namespace OvergameBot
           else if (callback.Message.Contains("*you next say") && callback.Message.Length > 13)
           {
             string val = callback.Message.Substring(13);
+            while (val.Remove(1) == " ") val = val.Substring(1);
             string val2 = "";
             foreach (char c in val)
             {
@@ -523,7 +532,7 @@ namespace OvergameBot
           else if (lower.Contains("last word")) { groupChat(callback, overgameInvalid()); }
           else if (lower.Contains("honk")) { groupChat(callback, exclaim("HULK", "")); }
           else if (lower.Contains("hmm")) { groupChat(callback, overgameIdea(callback)); }
-          else if (lower.Contains("hi.") || lower.Contains("hello"))
+          else if (lower.Contains("hi. ") || lower.Contains("hello"))
           {
               if (rndProb() < 50)
               {
@@ -624,8 +633,7 @@ namespace OvergameBot
         groupChat(callback, "*rewind*"); Thread.Sleep(2000);
         groupChat(callback, "*you aim self*"); Thread.Sleep(2000);
         groupChat(callback, "*you " + engDict[rnd.Next(dictLen)] +"*");
-        Thread.Sleep(2000);
-        return "*i laugh*";
+        Thread.Sleep(2000); return "*i laugh*";
       }
       else if (prob < 50)
       {
@@ -642,18 +650,13 @@ namespace OvergameBot
       else if (prob < 80)
       {
         groupChat(callback, "*i set up " + engDict[rnd.Next(dictLen)] + " shield*");
-        Thread.Sleep(2000);
-        return exclaim("come get me sjws..", ".");
+        Thread.Sleep(2000); return exclaim("come get me sjws..", ".");
       }
-      else if (prob < 90)
-      {
-        return overgameLook(overgameFriends());
-      }
+      else if (prob < 90) { return overgameLook(overgameFriends()); }
       else if (prob < 91)
       {
         steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, "That's it. I'm done with this charade. It's over.");
-        Thread.Sleep(1500);
-        steamFriends.LeaveChat(callback.ChatRoomID);
+        Thread.Sleep(1500); steamFriends.LeaveChat(callback.ChatRoomID);
         return "";
       }
       return overgameInvalid();
@@ -711,10 +714,7 @@ namespace OvergameBot
     {
       string exclaimString = "";
       int limit = rnd.Next(1,6);
-      for (int i = 0; i < limit; ++i)
-      {
-        exclaimString = exclaimString + repeatBit;
-      }
+      for (int i = 0; i < limit; ++i) { exclaimString = exclaimString + repeatBit; }
       return message + exclaimString;
     }
 
