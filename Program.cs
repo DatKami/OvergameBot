@@ -21,9 +21,9 @@ namespace OvergameBot
     //this may be errorprone as there is no way to determine if a bot gets kicked from chat.
     static List<SteamID> chatrooms = new List<SteamID>();
 
-    static List<string> untouchStrings = new List<string>();
-    static List<string> heuntonStrings = new List<string>();
-    static List<string> cwfStrings = new List<string>();
+    static List<string> untouchStrings = new List<string>(); //builds list containing "untouch"
+    static List<string> heuntonStrings = new List<string>(); //builds list containing "heunton"
+    static List<string> cwfStrings = new List<string>(); //builds list containing "cwf"
 
     static readonly string[] unnotable = new string[] { "kami", "wayne", "trog", "erarg", "mira", "anita" };
     static readonly string[] notable = new string[] { "moupi", "untouch",
@@ -345,7 +345,7 @@ namespace OvergameBot
       {
         steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, exclaim("IM NOT BOT", "!"));
       }
-      if (prob < 40)
+      else if (prob < 40)
       {
         steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, exclaim("im not bot..", "."));
       }
@@ -521,15 +521,16 @@ namespace OvergameBot
           else if (lower.Contains("cwf")) { groupChat(callback, overgameRandom(cwfStrings)); }
           else if (lower.Contains("bully")) { groupChat(callback, overgameReact(callback)); }
           else if (lower.Contains("last word")) { groupChat(callback, overgameInvalid()); }
+          else if (lower.Contains("honk")) { groupChat(callback, exclaim("HULK", "")); }
           else if (lower.Contains("hmm")) { groupChat(callback, overgameIdea(callback)); }
           else if (lower.Contains("hi.") || lower.Contains("hello"))
           {
-            if (rndProb() < 50)
-            {
-              Thread.Sleep(1500);
-              steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, exclaim("hi " + chatter, "."));
-            }
-            else { groupChat(callback, overgameReact(callback)); }
+              if (rndProb() < 50)
+              {
+                  Thread.Sleep(1500);
+                  steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, exclaim("hi " + chatter, "."));
+              }
+              else { groupChat(callback, overgameReact(callback)); }
           }
           else if (rndProb() < 25) { groupChat(callback, overgameIdle()); }
         }
