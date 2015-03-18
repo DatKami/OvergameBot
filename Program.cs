@@ -25,7 +25,7 @@ namespace OvergameBot
     static List<string> heuntonStrings = new List<string>(); //builds list containing "heunton"
     static List<string> cwfStrings = new List<string>(); //builds list containing "cwf"
 
-    static readonly string[] unnotable = new string[] { "kami", "wayne", "trog", "erarg", "mira", "anita" };
+    static readonly string[] unnotable = new string[] { "kami", "wayne", "trog", "erarg", "mira", "anita", "kiz" };
     static readonly string[] notable = new string[] { "moupi", "untouch",
     "doc", "doc gelegentlich", "heunton", "moup", "boris", "garret", "damros", "sjws", "emagravo", "garrett" };
     static readonly string[] exceptions = new string[] { "i", "overgame", "cwf", "laugh" };
@@ -145,7 +145,7 @@ namespace OvergameBot
       banTimer.Enabled = true;
 
       aTimer.Elapsed += new System.Timers.ElapsedEventHandler(OnTimerUp);
-      aTimer.Enabled = true;
+      aTimer.Enabled = false;
 
       SteamLogin();
     }
@@ -278,12 +278,16 @@ namespace OvergameBot
         Console.Write("You have steam guard code???: ");
         guard = Console.ReadLine();
       }
-      if (callback.Result != EResult.OK)
+      else if (callback.Result != EResult.OK)
       {
         Console.WriteLine("You wrong! What {0}???", callback.Result);
         isRunning = false;  return;
       }
-      Console.WriteLine("{0} hacked!!!", user);
+      else //everything went right.
+      {
+        Console.WriteLine("{0} hacked!!!", user);
+      }
+
     }
 
     static void OnDisconnected(SteamClient.DisconnectedCallback callback)
@@ -296,7 +300,7 @@ namespace OvergameBot
 
     static void OnMachineAuth(SteamUser.UpdateMachineAuthCallback callback)
     {
-      Console.WriteLine("I sentry...");
+      Console.WriteLine("I write sentry file...");
 
       byte[] sentryhash = CryptoHelper.SHAHash(callback.Data);
 
