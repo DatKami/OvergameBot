@@ -56,7 +56,7 @@ namespace OvergameBot
     static SteamFriends steamFriends;
 
     static int frantic = 75;
-    static int ignore = 0;
+    static int ignore = 90;
 
     static bool kickable = false;
 
@@ -82,7 +82,7 @@ namespace OvergameBot
       aTimer.Enabled = true;
       Console.WriteLine("Responding in " + (dur + dur2 + dur3) + " ms...");
       System.Timers.Timer delayMessage = new System.Timers.Timer(dur + dur2 + dur3);
-      timers.Add(delayMessage);
+      //timers.Add(delayMessage);
       delayMessage.Elapsed += (sender, e) => DelayedMessage(sender, e, callback, message, "");
       delayMessage.Enabled = true;
     }
@@ -92,7 +92,7 @@ namespace OvergameBot
         int dur = type(message);
         int dur2 = type(full) * sequence-1 / total;
         busy = true;
-        aTimer.Interval = dur + dur2;
+        aTimer.Interval = (dur + dur2) * 2; //double for antispam
         aTimer.Enabled = true;
         Console.WriteLine("Responding in " + (dur + dur2) + " ms...");
         System.Timers.Timer delayMessage = new System.Timers.Timer(dur + dur2);
@@ -146,7 +146,7 @@ namespace OvergameBot
     static void Main(string[] args)
     {
 
-      Console.Title = "OvergameBot";
+      Console.Title = "ChatTxtBot";
       Console.WriteLine("CTRL+C bully me!");
 
       getCredentials();
@@ -269,13 +269,6 @@ namespace OvergameBot
       banTimer.Enabled = false;
       Console.WriteLine("Now bannable.");
     }
-      /*
-    static void DelayedMessage(Object sender, EventArgs c, SteamFriends.ChatMsgCallback callback, string message)
-    {
-      steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, overgameRandomCaps(message));
-      ((System.Timers.Timer)sender).Dispose();
-    }
-      */
 
     static void DelayedMessage(Object sender, EventArgs c, SteamFriends.ChatMsgCallback callback, string message, string name)
     {
@@ -286,7 +279,6 @@ namespace OvergameBot
         }
         Thread.Sleep(2000);
         steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, message);
-        //timers.Remove((System.Timers.Timer)sender);
         ((System.Timers.Timer)sender).Dispose();
     }
 
@@ -407,35 +399,9 @@ namespace OvergameBot
     static void OnJoinChat(SteamFriends.ChatEnterCallback callback)
     {  
       //commit the chatroom to the chatrooms list
-      if(!chatrooms.Contains(callback.ChatID)) chatrooms.Add(callback.ChatID); 
-
-      /*
-      int prob = rndProb();
-      if (prob < 20)
-      {
-        steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, exclaim("IM NOT BOT", "!"));
-      }
-      else if (prob < 40)
-      {
-        steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, exclaim("im not bot..", "."));
-      }
-      else if (prob < 60)
-      {
-        steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, "hello.");
-        Thread.Sleep(1500);
-        steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, "im back.");
-      }
-      else if (prob < 80)
-      {
-        steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, exclaim("hello..","."));
-        Thread.Sleep(1500);
-        steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, exclaim("im back..","."));
-      }
-      else
-      {
-        steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, "good moring.");
-      }
-      */
+      if(!chatrooms.Contains(callback.ChatID)) chatrooms.Add(callback.ChatID);
+      steamFriends.SetPersonaName("ChatTXTBot");
+      steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, "chat_txt bot, now with antispam, probably. type !chat_txt to throw out a quote.");
     }
 
     // ======================== MAIN CHAT ROUTINE ========================
@@ -524,7 +490,7 @@ namespace OvergameBot
           {
             steamFriends.LeaveChat(callback.ChatRoomID);
           }
-          else if (!busy)
+          else if (!busy && (rndProb() > ignore || callback.Message.Contains("!chat_txt")))
           {
               string toQueue = chatLines[rnd.Next(chatLen)];
               Queue<string> workingQueue = new Queue<string>(toQueue.Split(new[] { '\n' }));
@@ -627,7 +593,6 @@ namespace OvergameBot
           }
           else if (rndProb() < 25) { groupChat(callback, overgameIdle()); }
           */
-        }
       }
     }
 
