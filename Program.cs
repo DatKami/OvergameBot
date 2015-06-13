@@ -54,9 +54,9 @@ namespace OvergameBot
     static SteamFriends steamFriends;
 
     static int frantic = 75;
-    //static int ignore = 0;
+    static int ignore = 0;
 
-    //static bool kickable = false;
+    static bool kickable = false;
 
     static bool isRunning;
     static Random rnd = new Random();
@@ -70,7 +70,6 @@ namespace OvergameBot
     {
       return rnd.Next(100);
     }
-
     static void groupChat(SteamFriends.ChatMsgCallback callback, string message)
     {
       int dur = read(callback.Message);
@@ -83,8 +82,7 @@ namespace OvergameBot
       System.Timers.Timer delayMessage = new System.Timers.Timer(dur + dur2 + dur3);
       delayMessage.Elapsed += (sender, e) => DelayedMessage(sender, e, callback, message);
       delayMessage.Enabled = true;
-    }
-
+    }   
     public static string[] tokenize(string message)
     {
       return message.ToLower().Split(delim, StringSplitOptions.RemoveEmptyEntries);
@@ -437,10 +435,18 @@ namespace OvergameBot
           while (workingQueue.Count > 0)
           {
               string readString = workingQueue.Dequeue();
+              if (Char.IsDigit(readString[0]) && (readString.IndexOf(':') < 3)) //timestamp detection
+              {
+                  int hyphenPos = readString.IndexOf('-');
+                  if (hyphenPos != 1) readString = readString.Remove(0, hyphenPos + 2);
+              }
               int colonPos = readString.IndexOf(':');
+              if (colonPos == -1) break;
               string name = readString.Remove(colonPos);
               steamFriends.SetPersonaName(name);
-              groupChat(callback, readString.Remove(0,colonPos-1));
+              string message = readString.Remove(0,colonPos+1);
+              Thread.Sleep(type(message));
+              steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, message);
           }
           /*
           if (lower.Contains("!echo "))//echo a message to all other rooms
@@ -451,9 +457,10 @@ namespace OvergameBot
                 steamFriends.SendChatRoomMessage(roomID, EChatEntryType.ChatMsg, callback.Message.Substring(6));
             }
           }
-          else if (lower.Contains("*i set ignore percent to"))
+          */
+          if (lower.Contains("!ignore"))
           {
-            string val = lower.Substring(25);
+            string val = lower.Substring(8);
             string val2 = "";
             int count = 0;
             foreach (char c in val)
@@ -466,20 +473,21 @@ namespace OvergameBot
             try { i = int.Parse(val2); }
             catch (FormatException)
             {
-              groupChat(callback, exclaim("you wrong!!! that number", "?"));
+                groupChat(callback, "(That's not a number.)");
               return;
             }
             if (i >= 0)
             {
               ignore = i;
-              groupChat(callback, exclaim("get " + i + "% of shit out", "!"));
+              groupChat(callback, ("(I'll ignore " + i + "% of stimulus.)"));
             }
-            else groupChat(callback, exclaim("you wrong", "!"));
+            else groupChat(callback, "(I don't know what you tried to do there.)");
 
           }
-          else if (lower.Contains("*i set overgame speed to"))
+
+          else if (lower.Contains("!speed"))
           {
-            string val = lower.Substring(25);
+            string val = lower.Substring(7);
             string val2 = "";
             foreach (char c in val)
             {
@@ -491,28 +499,28 @@ namespace OvergameBot
             try { i = int.Parse(val2); }
             catch (FormatException)
             {
-              groupChat(callback, exclaim("you wrong!!! that number", "?"));
+              groupChat(callback, "(That's not a number.)");
               return;
             }
-            if (i <= 0) groupChat(callback, exclaim("too fast", "!"));
-            else if (i > 500) groupChat(callback, exclaim("you wrong", "!"));
+            if (i <= 0) groupChat(callback, "(That's too fast.)");
+            else if (i > 500) groupChat(callback, "(That's too slow.)");
             else
             {
               frantic = i;
-              groupChat(callback, exclaim("i talk " + i + "% original delay", "!"));
+              groupChat(callback, ("(I'll recite chat quotes with " + i + "% original delay.)"));
             }
           }
-          else if (callback.Message.Contains("*i set overgame name to"))
+
+          if (callback.Message.Contains("!name"))
           {
-            string val = callback.Message.Substring(24);
-            string val2 = "";
-            foreach (char c in val)
-            {
-              if (c != '*')
-              { val2 = val2 + c; }
-            }
-            steamFriends.SetPersonaName(val2);
+            string val = callback.Message.Substring(6);
+            steamFriends.SetPersonaName(val);
           }
+          if (callback.Message.Contains("!kick"))
+          {
+            steamFriends.LeaveChat(callback.ChatRoomID);
+          }
+              /*
           else if (callback.Message.Contains("*you next say") && callback.Message.Length > 13)
           {
             string val = callback.Message.Substring(13);
