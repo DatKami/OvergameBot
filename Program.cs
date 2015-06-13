@@ -16,6 +16,11 @@ namespace OvergameBot
 
     static readonly List<string> overStrings = new List<string>(File.ReadAllLines("overgame.txt")); // build known overgame phrases
     */
+
+    //static readonly List<string> chatLines = new List<string>(File.ReadAllLines("chat_lines.csv")); //build a list to read chat lines from
+    static StreamReader sr = new StreamReader("chat_lines.csv");
+    static List<string> chatLines = new List<string>();
+
     static Dictionary<string, string> steamIDs = new Dictionary<string, string>();
 
     //list of chatrooms overgame has visited in this run.
@@ -35,7 +40,8 @@ namespace OvergameBot
 
     static string[] phrases = { };
     
-    static int dictLen = 58110;
+    //static int dictLen = 58110;
+    static int chatLen = 0;
 
     static System.Timers.Timer aTimer = new System.Timers.Timer(6000);
     static System.Timers.Timer banTimer = new System.Timers.Timer(120000);
@@ -48,9 +54,9 @@ namespace OvergameBot
     static SteamFriends steamFriends;
 
     static int frantic = 75;
-    static int ignore = 0;
+    //static int ignore = 0;
 
-    static bool kickable = false;
+    //static bool kickable = false;
 
     static bool isRunning;
     static Random rnd = new Random();
@@ -133,6 +139,26 @@ namespace OvergameBot
       //enumerate steamIDs
       steamIDs.Add("STEAM_0:1:29195580", "untouch");
       steamIDs.Add("STEAM_0:0:63212978", "overgame");
+
+      string workingString = "";
+      while (sr.Peek() >= 0)
+      {
+          if (sr.Peek() == '\r')
+          {
+              sr.Read();
+              if (sr.Peek() == '\n') sr.Read();
+              chatLines.Add(workingString);
+              workingString = "";
+          }
+          else
+          {
+              workingString = workingString + (char)sr.Read();
+          }
+      }
+      sr.Close();
+
+      chatLen = chatLines.Count;
+
       /*
       foreach (string st in overStrings)
       {
@@ -142,6 +168,7 @@ namespace OvergameBot
         if (s.Contains("cwf")) cwfStrings.Add(s);
       }
       */
+
       banTimer.Elapsed += new System.Timers.ElapsedEventHandler(OnBanUp);
       banTimer.Enabled = true;
 
@@ -227,11 +254,18 @@ namespace OvergameBot
       banTimer.Enabled = false;
       Console.WriteLine("Now bannable.");
     }
-
+      /*
     static void DelayedMessage(Object sender, EventArgs c, SteamFriends.ChatMsgCallback callback, string message)
     {
       steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, overgameRandomCaps(message));
       ((System.Timers.Timer)sender).Dispose();
+    }
+      */
+
+    static void DelayedMessage(Object sender, EventArgs c, SteamFriends.ChatMsgCallback callback, string message)
+    {
+        steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, message);
+        ((System.Timers.Timer)sender).Dispose();
     }
 
     static void resetBanTimer()
@@ -398,6 +432,16 @@ namespace OvergameBot
       {
         if (lower.Length > 1)
         {
+          string toQueue = chatLines[rnd.Next(chatLen)];
+          Queue<string> workingQueue = new Queue<string>(toQueue.Split(new[]{'\n'}));
+          while (workingQueue.Count > 0)
+          {
+              string readString = workingQueue.Dequeue();
+              int colonPos = readString.IndexOf(':');
+              string name = readString.Remove(colonPos);
+              steamFriends.SetPersonaName(name);
+              groupChat(callback, readString.Remove(0,colonPos-1));
+          }
           /*
           if (lower.Contains("!echo "))//echo a message to all other rooms
           {
