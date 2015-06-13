@@ -29,7 +29,7 @@ namespace OvergameBot
     static readonly string[] notable = new string[] { "moupi", "untouch",
     "doc", "doc gelegentlich", "heunton", "moup", "boris", "garret", "damros", "sjws", "emagravo", "garrett" };
     static readonly string[] exceptions = new string[] { "i", "overgame", "cwf", "laugh" };
-
+    
     static readonly char[] delim = { ' ', '.', ',', ':', '\t', '*' };
 
     static string[] phrases = { };
@@ -395,6 +395,7 @@ namespace OvergameBot
       {
         if (lower.Length > 1)
         {
+          /*
           if (lower.Contains("!echo "))//echo a message to all other rooms
           {
             foreach (SteamID roomID in chatrooms)
@@ -546,6 +547,7 @@ namespace OvergameBot
               else { groupChat(callback, overgameReact(callback)); }
           }
           else if (rndProb() < 25) { groupChat(callback, overgameIdle()); }
+          */
         }
       }
     }
