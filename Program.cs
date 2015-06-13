@@ -23,6 +23,8 @@ namespace OvergameBot
 
     static Dictionary<string, string> steamIDs = new Dictionary<string, string>();
 
+    //static List<System.Timers.Timer> timers = new List<System.Timers.Timer>();
+
     //list of chatrooms overgame has visited in this run.
     //this may be errorprone as there is no way to determine if a bot gets kicked from chat.
     static List<SteamID> chatrooms = new List<SteamID>();
@@ -80,9 +82,24 @@ namespace OvergameBot
       aTimer.Enabled = true;
       Console.WriteLine("Responding in " + (dur + dur2 + dur3) + " ms...");
       System.Timers.Timer delayMessage = new System.Timers.Timer(dur + dur2 + dur3);
-      delayMessage.Elapsed += (sender, e) => DelayedMessage(sender, e, callback, message);
+      timers.Add(delayMessage);
+      delayMessage.Elapsed += (sender, e) => DelayedMessage(sender, e, callback, message, "");
       delayMessage.Enabled = true;
-    }   
+    }
+
+    static void heapChat(SteamFriends.ChatMsgCallback callback, string full, int sequence, int total, string message, string name)
+    {
+        int dur = type(message);
+        int dur2 = type(full) * sequence-1 / total;
+        busy = true;
+        aTimer.Interval = dur + dur2;
+        aTimer.Enabled = true;
+        Console.WriteLine("Responding in " + (dur + dur2) + " ms...");
+        System.Timers.Timer delayMessage = new System.Timers.Timer(dur + dur2);
+        //timers.Add(delayMessage);
+        delayMessage.Elapsed += (sender, e) => DelayedMessage(sender, e, callback, message, name);
+        delayMessage.Enabled = true;
+    }
     public static string[] tokenize(string message)
     {
       return message.ToLower().Split(delim, StringSplitOptions.RemoveEmptyEntries);
@@ -260,9 +277,16 @@ namespace OvergameBot
     }
       */
 
-    static void DelayedMessage(Object sender, EventArgs c, SteamFriends.ChatMsgCallback callback, string message)
+    static void DelayedMessage(Object sender, EventArgs c, SteamFriends.ChatMsgCallback callback, string message, string name)
     {
+
+        if (name != "")
+        {
+            steamFriends.SetPersonaName(name);
+        }
+        Thread.Sleep(2000);
         steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, message);
+        //timers.Remove((System.Timers.Timer)sender);
         ((System.Timers.Timer)sender).Dispose();
     }
 
@@ -428,26 +452,6 @@ namespace OvergameBot
       string lower = callback.Message.ToLower();
       if (callback.ChatMsgType == EChatEntryType.ChatMsg)
       {
-        if (lower.Length > 1)
-        {
-          string toQueue = chatLines[rnd.Next(chatLen)];
-          Queue<string> workingQueue = new Queue<string>(toQueue.Split(new[]{'\n'}));
-          while (workingQueue.Count > 0)
-          {
-              string readString = workingQueue.Dequeue();
-              if (Char.IsDigit(readString[0]) && (readString.IndexOf(':') < 3)) //timestamp detection
-              {
-                  int hyphenPos = readString.IndexOf('-');
-                  if (hyphenPos != 1) readString = readString.Remove(0, hyphenPos + 2);
-              }
-              int colonPos = readString.IndexOf(':');
-              if (colonPos == -1) break;
-              string name = readString.Remove(colonPos);
-              steamFriends.SetPersonaName(name);
-              string message = readString.Remove(0,colonPos+1);
-              Thread.Sleep(type(message));
-              steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, message);
-          }
           /*
           if (lower.Contains("!echo "))//echo a message to all other rooms
           {
@@ -511,14 +515,34 @@ namespace OvergameBot
             }
           }
 
-          if (callback.Message.Contains("!name"))
+          else if (callback.Message.Contains("!name"))
           {
             string val = callback.Message.Substring(6);
             steamFriends.SetPersonaName(val);
           }
-          if (callback.Message.Contains("!kick"))
+          else if (callback.Message.Contains("!kick"))
           {
             steamFriends.LeaveChat(callback.ChatRoomID);
+          }
+          else if (!busy)
+          {
+              string toQueue = chatLines[rnd.Next(chatLen)];
+              Queue<string> workingQueue = new Queue<string>(toQueue.Split(new[] { '\n' }));
+              int total = workingQueue.Count;
+              while (workingQueue.Count > 0)
+              {
+                  string readString = workingQueue.Dequeue();
+                  if (Char.IsDigit(readString[0]) && (readString.IndexOf(':') < 3)) //timestamp detection
+                  {
+                      int hyphenPos = readString.IndexOf('-');
+                      if (hyphenPos != 1) readString = readString.Remove(0, hyphenPos + 2);
+                  }
+                  int colonPos = readString.IndexOf(':');
+                  if (colonPos == -1) break;
+                  string name = readString.Remove(colonPos);
+                  string message = readString.Remove(0, colonPos + 1);
+                  heapChat(callback, toQueue, total - workingQueue.Count, total, message, name);
+              }
           }
               /*
           else if (callback.Message.Contains("*you next say") && callback.Message.Length > 13)
