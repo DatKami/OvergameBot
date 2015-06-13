@@ -11,16 +11,17 @@ namespace OvergameBot
 {
   class Program
   {
+    /*
     static readonly List<string> engDict = new List<string>(File.ReadAllLines("allwords_lc.txt")); //build a list to detect non english words
 
     static readonly List<string> overStrings = new List<string>(File.ReadAllLines("overgame.txt")); // build known overgame phrases
-
+    */
     static Dictionary<string, string> steamIDs = new Dictionary<string, string>();
 
     //list of chatrooms overgame has visited in this run.
     //this may be errorprone as there is no way to determine if a bot gets kicked from chat.
     static List<SteamID> chatrooms = new List<SteamID>();
-
+    /*
     static List<string> untouchStrings = new List<string>(); //builds list containing "untouch"
     static List<string> heuntonStrings = new List<string>(); //builds list containing "heunton"
     static List<string> cwfStrings = new List<string>(); //builds list containing "cwf"
@@ -29,7 +30,7 @@ namespace OvergameBot
     static readonly string[] notable = new string[] { "moupi", "untouch",
     "doc", "doc gelegentlich", "heunton", "moup", "boris", "garret", "damros", "sjws", "emagravo", "garrett" };
     static readonly string[] exceptions = new string[] { "i", "overgame", "cwf", "laugh" };
-    
+    */
     static readonly char[] delim = { ' ', '.', ',', ':', '\t', '*' };
 
     static string[] phrases = { };
@@ -102,7 +103,7 @@ namespace OvergameBot
 
     public static int type(string message)
     { return (int)(message.Length * .4 * frantic); }
-
+    /*
     public static void randomizePhrases()
     {
       phrases = new string[] { exclaim("toppermost of the poppermost", "!"), 
@@ -118,7 +119,7 @@ namespace OvergameBot
                                engDict[rnd.Next(dictLen)], "!")
                              };
     }
-
+   */
     // ======================== BOT INITIALIZATION ROUTINE ========================
 
     static void Main(string[] args)
@@ -132,7 +133,7 @@ namespace OvergameBot
       //enumerate steamIDs
       steamIDs.Add("STEAM_0:1:29195580", "untouch");
       steamIDs.Add("STEAM_0:0:63212978", "overgame");
-
+      /*
       foreach (string st in overStrings)
       {
         string s = st.ToLower();
@@ -140,7 +141,7 @@ namespace OvergameBot
         if (s.Contains("heu") || s.Contains("hue")) heuntonStrings.Add(s); 
         if (s.Contains("cwf")) cwfStrings.Add(s);
       }
-
+      */
       banTimer.Elapsed += new System.Timers.ElapsedEventHandler(OnBanUp);
       banTimer.Enabled = true;
 
@@ -352,6 +353,7 @@ namespace OvergameBot
       //commit the chatroom to the chatrooms list
       if(!chatrooms.Contains(callback.ChatID)) chatrooms.Add(callback.ChatID); 
 
+      /*
       int prob = rndProb();
       if (prob < 20)
       {
@@ -377,6 +379,7 @@ namespace OvergameBot
       {
         steamFriends.SendChatRoomMessage(callback.ChatID, EChatEntryType.ChatMsg, "good moring.");
       }
+      */
     }
 
     // ======================== MAIN CHAT ROUTINE ========================
@@ -554,6 +557,7 @@ namespace OvergameBot
 
     // ======================== OVERGAME SPEECH PATTERNS ========================
 
+    /*
     public static List<string> dictException(List<string> invalids)
     {
       foreach (string s in exceptions) { while (invalids.Contains(s)) invalids.Remove(s); }
@@ -723,6 +727,7 @@ namespace OvergameBot
       for (int i = 0; i < limit; ++i) { exclaimString = exclaimString + repeatBit; }
       return message + exclaimString;
     }
+    */
 
     // ======================== END OF OVERGAME ========================
   }

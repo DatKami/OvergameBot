@@ -38,3 +38,6 @@ C:\Users\guanj\OvergameBot\bin\Debug\protobuf-net.pdb
 C:\Users\guanj\OvergameBot\bin\Debug\protobuf-net.xml
 C:\Users\guanj\OvergameBot\bin\Debug\SteamKit2.xml
 C:\Users\guanj\OvergameBot\obj\Debug\OvergameBot.csprojResolveAssemblyReference.cache
+C:\Users\Brandon\Desktop\Dropbox\GitHub\OvergameBot\bin\Debug\OvergameBot.exe.config
+C:\Users\Brandon\Desktop\Dropbox\GitHub\OvergameBot\obj\Debug\OvergameBot.exe
+C:\Users\Brandon\Desktop\Dropbox\GitHub\OvergameBot\obj\Debug\OvergameBot.pdb
