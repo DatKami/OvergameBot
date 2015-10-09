@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SteamKit2;
 using System.IO;
 using System.Threading;
+using static OvergameBot.Helper;
+using static OvergameBot.OvergameSpeech;
 
 namespace OvergameBot
 {
@@ -24,11 +24,6 @@ namespace OvergameBot
     static List<string> untouchStrings = new List<string>(); //builds list containing "untouch"
     static List<string> heuntonStrings = new List<string>(); //builds list containing "heunton"
     static List<string> cwfStrings = new List<string>(); //builds list containing "cwf"
-
-    static readonly string[] unnotable = new string[] { "kami", "wayne", "trog", "erarg", "mira", "anita", "kiz" };
-    static readonly string[] notable = new string[] { "moupi", "untouch",
-    "doc", "doc gelegentlich", "heunton", "moup", "boris", "garret", "damros", "sjws", "emagravo", "garrett" };
-    static readonly string[] exceptions = new string[] { "i", "overgame", "cwf", "laugh" };
 
     static readonly char[] delim = { ' ', '.', ',', ':', '\t', '*' };
 
@@ -54,69 +49,14 @@ namespace OvergameBot
     static bool isRunning;
     static Random rnd = new Random();
 
-    static bool busy = false;
+    static BooleanWrapper busy = new BooleanWrapper(false);
 
 
     // ======================== HELPER FUNCTIONS ========================
 
-    public static int rndProb()
-    {
-      return rnd.Next(100);
-    }
-
     static void groupChat(SteamFriends.ChatMsgCallback callback, string message)
     {
-      int dur = read(callback.Message);
-      int dur2 = think();
-      int dur3 = type(message);
-      busy = true;
-      aTimer.Interval = dur + dur2 + dur3;
-      aTimer.Enabled = true;
-      Console.WriteLine("Responding in " + (dur + dur2 + dur3) + " ms...");
-      System.Timers.Timer delayMessage = new System.Timers.Timer(dur + dur2 + dur3);
-      delayMessage.Elapsed += (sender, e) => DelayedMessage(sender, e, callback, message);
-      delayMessage.Enabled = true;
-    }
-
-    public static string[] tokenize(string message)
-    {
-      return message.ToLower().Split(delim, StringSplitOptions.RemoveEmptyEntries);
-    }
-
-    /// <summary>
-    /// Removes all punctuation at the end of a string.
-    /// </summary>
-    /// <param name="message"></param>
-    /// <returns></returns>
-    public static string stripPunct(string message)
-    {
-      while (!Char.IsLetter(message[message.Length - 1]))
-      { message = message.Remove(message.Length - 1); }
-      return message;
-    }
-
-    public static int read(string message)
-    { return (int)(message.Length * .1) * frantic; }
-
-    public static int think() { return 18 * frantic; }
-
-    public static int type(string message)
-    { return (int)(message.Length * .4 * frantic); }
-
-    public static void randomizePhrases()
-    {
-      phrases = new string[] { exclaim("toppermost of the poppermost", "!"), 
-                               exclaim("Damngod..", "."),
-                               exclaim("where " + overgameFriends(), "?"), 
-                               exclaim("doc make me cwf", "!"),
-                               exclaim(" HELLPPP!!! THAT IMPERSON ME", "!"), 
-                               exclaim("i sick of overclone", "!"), 
-                               exclaim("no", "!"),
-
-                               exclaim(engDict[rnd.Next(dictLen)] + " " +
-                               engDict[rnd.Next(dictLen)] + " " +
-                               engDict[rnd.Next(dictLen)], "!")
-                             };
+      Helper.groupChat(callback, message, frantic, aTimer, steamFriends, busy);
     }
 
     // ======================== BOT INITIALIZATION ROUTINE ========================
@@ -215,7 +155,7 @@ namespace OvergameBot
 
     static void OnTimerUp(object sender, EventArgs c)
     {
-      busy = false;
+      busy.set(false);
       aTimer.Enabled = false;
       Console.WriteLine("Now accepting requests.");
     }
@@ -225,12 +165,6 @@ namespace OvergameBot
       kickable = true;
       banTimer.Enabled = false;
       Console.WriteLine("Now bannable.");
-    }
-
-    static void DelayedMessage(Object sender, EventArgs c, SteamFriends.ChatMsgCallback callback, string message)
-    {
-      steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg, overgameRandomCaps(message));
-      ((System.Timers.Timer)sender).Dispose();
     }
 
     static void resetBanTimer()
@@ -388,7 +322,7 @@ namespace OvergameBot
       string chatter = steamFriends.GetFriendPersonaName(id);
 
       Console.WriteLine(chatter + "(" + idstr + "): " + callback.Message);
-      if (busy) { Console.WriteLine("Busy."); }
+      if (busy.get()) { Console.WriteLine("Busy."); }
 
       string lower = callback.Message.ToLower();
       if (callback.ChatMsgType == EChatEntryType.ChatMsg)
@@ -477,15 +411,15 @@ namespace OvergameBot
             }
             Thread.Sleep(2500);
             steamFriends.SendChatRoomMessage(callback.ChatRoomID, EChatEntryType.ChatMsg,
-                        exclaim(stripPunct(overgameRandomCaps(val2)), "."));
+                        exclaim(stripPunct(overgameRandomCaps(val2, rnd)), "."));
             if (rndProb() < 50) groupChat(callback, exclaim("HEY", "!"));
             else groupChat(callback, exclaim("WHAT", "!"));
           }
-          else if (busy) return;
+          else if (busy.get()) return;
           else if (rndProb() < ignore) return; // random prob in lieu of wait ignore
           else if (lower.Remove(1) == "*") //act
           {
-            string[] words = tokenize(lower);
+            string[] words = tokenize(delim, lower);
             List<string> notValid = new List<string>(new string[] { });
             Console.Write("Analyzing words...: ");
             foreach (string s in words)
@@ -552,54 +486,10 @@ namespace OvergameBot
 
     // ======================== OVERGAME SPEECH PATTERNS ========================
 
-    public static List<string> dictException(List<string> invalids)
-    {
-      foreach (string s in exceptions) { while (invalids.Contains(s)) invalids.Remove(s); }
-      foreach (string s in unnotable) { while (invalids.Contains(s)) invalids.Remove(s); }
-      foreach (string s in notable) { while (invalids.Contains(s)) invalids.Remove(s); }
-      return invalids;
-    }
-
-    public static string overgameUndo(string message)
-    {
-      int prob = rndProb();
-      if (prob < 40) { return exclaim("i what un" + message, "!"); }
-      else if (prob < 80) return exclaim("un" + message + " me", "!");
-      else return "no.";
-    }
-
-    public static string overgameImperson()
-    {
-      string[] imperson = { exclaim(" HELLPPP!!! THAT IMPERSON ME", "!"), exclaim("i sick of overclone", "!"), exclaim("no", "!") };
-      return imperson[rnd.Next(imperson.Length)];
-    }
-
-    public static string overgameInvalid()
-    {
-      string[] inval = { exclaim("what you say", "!"), exclaim("english motherfucker, do you speak it", "?"), exclaim("STOP", "!") };
-      return inval[rnd.Next(inval.Length)];
-    }
-
-    public static string overgameRandomCaps(string message)
-    {
-      int prob = rnd.Next(100);
-      if (prob < 40)
-      {
-        return message.ToLower(); //lowercase everything
-      }
-      else if (prob < 80)
-      {
-        return message.ToUpper(); //uppercase everything
-      }
-      return message.First().ToString().ToUpper() + message.ToLower().Substring(1);
-      //first capitalized
-    }
-
     public static string overgameIdle()
     {
-
       int prob = rndProb();
-      if (prob < 15) { randomizePhrases(); return phrases[rnd.Next(phrases.Length)]; }
+      if (prob < 15) { randomizePhrases(phrases, engDict, dictLen); return phrases[rnd.Next(phrases.Length)]; }
       else if (prob < 35) { return exclaim(overStrings[rnd.Next(overStrings.Count)], "!"); }
       else if (prob < 75) { return exclaim(stripPunct(overStrings[rnd.Next(overStrings.Count)]), "."); }
       return overStrings[rnd.Next(overStrings.Count)];
@@ -700,26 +590,6 @@ namespace OvergameBot
         }
       }
 
-    }
-
-    public static string overgameAim(string a, string b)
-    { return "*i aim " + a + " to " + b + "*"; }
-
-    public static string overgameLook(string a)
-    { return "*i look to " + a + "*"; }
-
-    public static string overgameFriends()
-    {
-      if (rnd.Next(100) < 25) { return unnotable[rnd.Next(unnotable.Length)]; }
-      return notable[rnd.Next(notable.Length)]; 
-    }
-
-    public static string exclaim(string message, string repeatBit)
-    {
-      string exclaimString = "";
-      int limit = rnd.Next(1,6);
-      for (int i = 0; i < limit; ++i) { exclaimString = exclaimString + repeatBit; }
-      return message + exclaimString;
     }
 
     // ======================== END OF OVERGAME ========================

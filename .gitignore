@@ -42,3 +42,10 @@ Network Trash Folder
 Temporary Items
 .apdisk
 *.bin
+bin/Debug/OvergameBot.vshost.exe
+bin/Debug/
+obj/
+obj/Debug/
+packages/
+.vs/
+Properties/
